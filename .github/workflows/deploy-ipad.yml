@@ -1,6 +1,6 @@
 name: Deploy iPad Build
 
-on:
+"on":
   workflow_dispatch:
     inputs:
       release_tag:
