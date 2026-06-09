@@ -41,7 +41,7 @@ tests/
 <!-- MANUAL ADDITIONS START -->
 ## Caveman Mode (Manual)
 
-- Referenz: `.github/caveman-mode.md`.
+- Reference: `.github/caveman-mode.md`.
 
 <!-- MANUAL ADDITIONS END -->
 
