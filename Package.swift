@@ -51,7 +51,7 @@ let package = Package(
       dependencies: ["GaiaCore"],
       path: "app/controller",
       exclude: [
-        "README.md",
+        "README.md"
       ]
     ),
     .testTarget(
