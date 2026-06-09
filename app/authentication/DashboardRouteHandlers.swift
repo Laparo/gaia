@@ -115,16 +115,14 @@ enum DashboardRouteHandlers {
 
     let formatter = ISO8601DateFormatter()
 
-    let initialEvent = DashboardStatusPayload(
+    let initialEvent = DashboardStatusEvent(
+      type: .connectionChanged,
+      timestamp: now,
       connection: .init(
-        aither: DashboardConnectionState.connected.rawValue,
-        hemera: DashboardConnectionState.connected.rawValue
+        aither: .connected,
+        hemera: .connected
       ),
-      system: .init(
-        serviceStatus: DashboardServiceHealth.healthy.rawValue,
-        lastUpdatedAt: now
-      ),
-      events: .init(transport: "sse", endpoint: statusEventsPath)
+      system: .init(serviceStatus: .healthy, lastUpdatedAt: now)
     )
 
     if let initialFrame = encodeStatusFrame(event: initialEvent, encoder: encoder) {
@@ -163,7 +161,7 @@ enum DashboardRouteHandlers {
   }
 
   private static func encodeStatusFrame(
-    event: DashboardStatusPayload,
+    event: DashboardStatusEvent,
     encoder: JSONEncoder
   ) -> String? {
     guard let data = try? encoder.encode(event),
@@ -171,6 +169,6 @@ enum DashboardRouteHandlers {
     else {
       return nil
     }
-    return "event: status\ndata: \(payload)\n\n"
+    return "event: \(event.type.rawValue)\ndata: \(payload)\n\n"
   }
 }

@@ -157,12 +157,50 @@ public struct HemeraDashboardClient: DashboardServiceProtocol, Sendable {
 
   private func fetchDecoded<Value: Decodable>(path: String, type: Value.Type) async throws -> Value
   {
-    let url = baseURL.appendingPathComponent(path)
+    let url = try makeURL(path: path)
     let (data, response) = try await session.data(from: url)
     guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
       throw URLError(.badServerResponse)
     }
     return try decoder.decode(Value.self, from: data)
+  }
+
+  /// Builds a URL from a route string that may include a leading slash and a
+  /// query component. `URL.appendingPathComponent` is not query-aware and would
+  /// percent-encode the `?`, so this splits path and query first and uses
+  /// `URLComponents` to attach query items correctly.
+  private func makeURL(path: String) throws -> URL {
+    let trimmedPath = path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+    let routePath: String
+    let routeQuery: String?
+    if let querySeparator = trimmedPath.firstIndex(of: "?") {
+      routePath = String(trimmedPath[..<querySeparator])
+      let queryStart = trimmedPath.index(after: querySeparator)
+      routeQuery = queryStart < trimmedPath.endIndex ? String(trimmedPath[queryStart...]) : nil
+    } else {
+      routePath = trimmedPath
+      routeQuery = nil
+    }
+
+    let routeURL = routePath.isEmpty ? baseURL : baseURL.appendingPathComponent(routePath)
+    guard let scheme = routeURL.scheme else {
+      throw URLError(.badURL)
+    }
+    _ = scheme
+
+    if let routeQuery, !routeQuery.isEmpty {
+      guard var components = URLComponents(url: routeURL, resolvingAgainstBaseURL: false) else {
+        throw URLError(.badURL)
+      }
+      let percentDecoded = routeQuery.removingPercentEncoding ?? routeQuery
+      components.percentEncodedQuery = percentDecoded
+      guard let composed = components.url else {
+        throw URLError(.badURL)
+      }
+      return composed
+    }
+
+    return routeURL
   }
 }
 

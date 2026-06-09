@@ -94,6 +94,11 @@ public struct ConnectionStatusMonitor: Sendable {
               throw URLError(.badServerResponse)
             }
 
+            // Reset the backoff attempt once the stream is healthy so that
+            // long-lived sessions do not exhaust the reconnect budget on
+            // intermittent transient failures.
+            attempt = 0
+
             for try await line in asyncBytes.lines {
               if Task.isCancelled {
                 break outer

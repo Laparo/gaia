@@ -10,11 +10,21 @@ public struct DashboardStatusEvent: Codable, Equatable, Sendable {
   public struct ConnectionSnapshot: Codable, Equatable, Sendable {
     public let aither: DashboardConnectionState
     public let hemera: DashboardConnectionState
+
+    public init(aither: DashboardConnectionState, hemera: DashboardConnectionState) {
+      self.aither = aither
+      self.hemera = hemera
+    }
   }
 
   public struct SystemSnapshot: Codable, Equatable, Sendable {
     public let serviceStatus: DashboardServiceHealth
     public let lastUpdatedAt: Date
+
+    public init(serviceStatus: DashboardServiceHealth, lastUpdatedAt: Date) {
+      self.serviceStatus = serviceStatus
+      self.lastUpdatedAt = lastUpdatedAt
+    }
   }
 
   public let type: DashboardStatusEventType

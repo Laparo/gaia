@@ -6,11 +6,11 @@ import Testing
 ///
 /// `makeDashboardTestSession(handler:)` allocates a fresh `URLProtocol`
 /// subclass at runtime via the Objective-C runtime. The handler is stored
-/// in a process-wide `NSMapTable` keyed by the *subclass itself*, so each
-/// URLSession's protocol has its own slot and concurrent sessions can never
-/// clobber one another. This removes the `URLError -1011` flakes that
-/// appeared when Swift Testing parallelised dashboard suites against a
-/// shared static handler.
+/// in a process-wide Swift dictionary keyed by the runtime-allocated subclass
+/// (`ObjectIdentifier(type)`), so each URLSession's protocol has its own slot and
+/// concurrent sessions can never clobber one another. This removes the
+/// `URLError -1011` flakes that appeared when Swift Testing parallelised
+/// dashboard suites against a shared static handler.
 private final class ScopedDashboardURLProtocol: URLProtocol, @unchecked Sendable {
   override class func canInit(with request: URLRequest) -> Bool {
     true
@@ -124,9 +124,11 @@ func makeDashboardTestSession(
   return URLSession(configuration: configuration)
 }
 
-/// Best-effort cleanup hook. Per-call subclasses keep handlers isolated, so
-/// this is a no-op kept for callers that want to opt into explicit teardown.
+/// Best-effort cleanup hook.
+///
+/// Note: handlers are stored in a process-wide static dictionary keyed by the
+/// runtime-allocated URLProtocol subclass, so they are retained for the life of
+/// the test process (Objective-C runtime classes cannot be deallocated).
 func clearDashboardTestHandlers() {
-  // No-op: handlers are bound to per-call URLProtocol subclasses and are
-  // released alongside the URLSession that owns them.
+  // Intentionally no-op.
 }
