@@ -6,6 +6,11 @@
 			"args": [
 				"@playwright/mcp@latest"
 			]
+		},
+		"context7": {
+			"type": "stdio",
+			"command": "bash",
+			"args": ["${workspaceFolder}/.vscode/context7-mcp.sh", "${workspaceFolder}/.env.local"]
 		}
 	}
 }
