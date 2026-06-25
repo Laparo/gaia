@@ -1,0 +1,25 @@
+{
+  "servers": {
+    "context7": {
+      "type": "stdio",
+      "command": "bash",
+      "args": ["${workspaceFolder}/.vscode/context7-mcp.sh", "${workspaceFolder}/.env.local"]
+    },
+    "codacy": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@codacy/codacy-mcp@latest"],
+      "env": {
+        "CODACY_ACCOUNT_TOKEN": "${input:codacy_token}"
+      }
+    }
+  },
+  "inputs": [
+    {
+      "id": "codacy_token",
+      "type": "promptString",
+      "description": "Enter your Codacy account token (from https://app.codacy.com/account/api-tokens)",
+      "password": true
+    }
+  ]
+}
