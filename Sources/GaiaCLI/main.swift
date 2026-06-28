@@ -207,7 +207,7 @@ struct ServiceCheckCommand {
   static let usage =
     "Usage: swift run GaiaCLI service-check [--hemera-base-url <url>] [--aither-base-url <url>] [--json|-j]"
 
-  static func parse(arguments: [String], environment: [String: String]) throws -> ServiceCheckCommand {
+  internal static func parse(arguments: [String], environment: [String: String]) throws -> ServiceCheckCommand {
     var hemeraOverride: URL?
     var aitherOverride: URL?
     var index = 1
@@ -383,7 +383,7 @@ func makeServiceStatus(
 ///   - environment: The merged environment dictionary used for credential resolution
 ///     and authentication runtime construction.
 /// - Returns: A `ServiceCheckResult` with per-service status, auth state, and metadata.
-func runServiceCheck(
+internal func runServiceCheck(
   command: ServiceCheckCommand,
   environment: [String: String]
 ) async throws -> ServiceCheckResult {

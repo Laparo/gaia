@@ -31,14 +31,23 @@ private struct HemeraCourseDetailEnvelope: Decodable {
         let canonical = try? decoder.container(keyedBy: CanonicalCodingKeys.self)
 
         // Canonical (contract) keys take precedence; fall back to legacy Hemera keys.
-        self.userId = try canonical?.decodeIfPresent(String.self, forKey: .userId)
+        // Both id/userId and displayName/name are required — throw when absent.
+        let resolvedUserId = try canonical?.decodeIfPresent(String.self, forKey: .userId)
           ?? container.decodeIfPresent(String.self, forKey: .userId)
-          ?? ""
-
-        self.name = try canonical?.decodeIfPresent(String.self, forKey: .name)
+        let resolvedName = try canonical?.decodeIfPresent(String.self, forKey: .name)
           ?? container.decodeIfPresent(String.self, forKey: .name)
-          ?? ""
 
+        guard let userId = resolvedUserId, let name = resolvedName else {
+          throw DecodingError.dataCorrupted(
+            .init(
+              codingPath: decoder.codingPath,
+              debugDescription: "Participant 'id'/'userId' and 'displayName'/'name' are required"
+            )
+          )
+        }
+
+        self.userId = userId
+        self.name = name
         self.imageUrl = try canonical?.decodeIfPresent(String.self, forKey: .imageUrl)
           ?? container.decodeIfPresent(String.self, forKey: .imageUrl)
       }
@@ -186,5 +195,67 @@ struct HemeraParticipantDecodingTests {
     #expect(envelope.data.participants[1].userId == "u2")
     #expect(envelope.data.participants[1].name == "Only Canonical")
     #expect(envelope.data.participants[1].imageUrl == nil)
+  }
+
+  // MARK: - Missing required fields → throws
+
+  @Test func throwsWhenBothUserIdAndIdAreMissing() throws {
+    let json = Data(
+      """
+      {
+        "data": {
+          "id": "course-bad",
+          "title": "Bad Course",
+          "participants": [
+            { "name": "No ID" }
+          ]
+        }
+      }
+      """.utf8)
+
+    let decoder = JSONDecoder()
+    #expect(throws: DecodingError.self) {
+      _ = try decoder.decode(HemeraCourseDetailEnvelope.self, from: json)
+    }
+  }
+
+  @Test func throwsWhenBothNameAndDisplayNameAreMissing() throws {
+    let json = Data(
+      """
+      {
+        "data": {
+          "id": "course-bad2",
+          "title": "Bad Course 2",
+          "participants": [
+            { "userId": "u-no-name" }
+          ]
+        }
+      }
+      """.utf8)
+
+    let decoder = JSONDecoder()
+    #expect(throws: DecodingError.self) {
+      _ = try decoder.decode(HemeraCourseDetailEnvelope.self, from: json)
+    }
+  }
+
+  @Test func throwsWhenParticipantHasNoFieldsAtAll() throws {
+    let json = Data(
+      """
+      {
+        "data": {
+          "id": "course-empty-p",
+          "title": "Empty Participant",
+          "participants": [
+            {}
+          ]
+        }
+      }
+      """.utf8)
+
+    let decoder = JSONDecoder()
+    #expect(throws: DecodingError.self) {
+      _ = try decoder.decode(HemeraCourseDetailEnvelope.self, from: json)
+    }
   }
 }

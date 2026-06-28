@@ -213,7 +213,9 @@ private struct AuthenticationAppConfiguration {
 
     // Default to an authenticated local controller session for loopback-only
     // development runs to keep simulator startup friction-free.
-    guard runtimeEnvironment != .production else {
+    // Explicitly configured GAIA_SEED_CONTROLLER_DEV_SESSION=true still works
+    // above; this default path only applies in development (not test/CI).
+    guard runtimeEnvironment == .development else {
       return false
     }
 

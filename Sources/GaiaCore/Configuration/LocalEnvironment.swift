@@ -221,6 +221,10 @@ public enum LocalEnvironment {
   /// Duplicate URLs are **deduplicated** (first occurrence wins) so that
   /// setting the same value under multiple keys never produces ambiguity.
   ///
+  /// > **Note**: In production, Aither has **no safe default** and requires
+  /// > explicit configuration via `GAIA_AITHER_BASE_URL` or the legacy
+  /// > `AITHER_BASE_URL`. Hemera defaults to `https://www.hemera.academy`.
+  ///
   /// - Parameters:
   ///   - service: The downstream service whose base URL is requested.
   ///   - environment: The merged environment dictionary.
@@ -439,20 +443,6 @@ public enum LocalEnvironment {
     }
 
     return false
-  }
-
-  private static func unique(_ values: [URL]) -> [URL] {
-    var seen: Set<String> = []
-    var result: [URL] = []
-
-    for value in values {
-      let key = value.absoluteString
-      if seen.insert(key).inserted {
-        result.append(value)
-      }
-    }
-
-    return result
   }
 
   public static func mergedWithProcessEnvironment(

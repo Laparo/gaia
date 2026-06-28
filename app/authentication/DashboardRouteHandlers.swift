@@ -45,14 +45,23 @@ private struct HemeraCourseDetailEnvelope: Decodable {
           let canonical = try? decoder.container(keyedBy: CanonicalCodingKeys.self)
 
           // Canonical (contract) keys take precedence; fall back to legacy Hemera keys.
-          self.userId = try canonical?.decodeIfPresent(String.self, forKey: .userId)
+          // Both id/userId and displayName/name are required — throw when absent.
+          let resolvedUserId = try canonical?.decodeIfPresent(String.self, forKey: .userId)
             ?? container.decodeIfPresent(String.self, forKey: .userId)
-            ?? ""
-
-          self.name = try canonical?.decodeIfPresent(String.self, forKey: .name)
+          let resolvedName = try canonical?.decodeIfPresent(String.self, forKey: .name)
             ?? container.decodeIfPresent(String.self, forKey: .name)
-            ?? ""
 
+          guard let userId = resolvedUserId, let name = resolvedName else {
+            throw DecodingError.dataCorrupted(
+              .init(
+                codingPath: decoder.codingPath,
+                debugDescription: "Participant 'id'/'userId' and 'displayName'/'name' are required"
+              )
+            )
+          }
+
+          self.userId = userId
+          self.name = name
           self.imageUrl = try canonical?.decodeIfPresent(String.self, forKey: .imageUrl)
             ?? container.decodeIfPresent(String.self, forKey: .imageUrl)
         }

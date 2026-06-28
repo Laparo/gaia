@@ -61,8 +61,8 @@ to Aither):
 - Development (`GAIA_ENV=development`, default local runtime):
 	Hemera and Aither use local network targets.
 - Production (`GAIA_ENV=production`):
-	Hemera prefers `https://www.hemera.academy`; Aither remains local-network
-	based.
+	Hemera prefers `https://www.hemera.academy`; Aither requires an explicit
+	base URL in production (no safe default).
 - Docker runtime:
 	treated as development; local services prefer `host.docker.internal`.
 
