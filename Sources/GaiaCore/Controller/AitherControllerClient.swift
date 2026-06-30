@@ -357,10 +357,12 @@ public struct AitherControllerClient: Sendable {
 
   private func makeBridgeSlideURL(fileName: String, courseID: String) -> URL {
     let slidePath = "api/controller/slides"
-    guard var components = URLComponents(
-      url: bridgeBaseURL.appendingPathComponent(slidePath).appendingPathComponent(fileName),
-      resolvingAgainstBaseURL: false
-    ) else {
+    guard
+      var components = URLComponents(
+        url: bridgeBaseURL.appendingPathComponent(slidePath).appendingPathComponent(fileName),
+        resolvingAgainstBaseURL: false
+      )
+    else {
       return bridgeBaseURL.appendingPathComponent(slidePath).appendingPathComponent(fileName)
     }
     // Preserve any query items already present on the resolved URL (e.g. from
@@ -369,7 +371,8 @@ public struct AitherControllerClient: Sendable {
     queryItems.removeAll { $0.name == "courseId" }
     queryItems.append(URLQueryItem(name: "courseId", value: courseID))
     components.queryItems = queryItems
-    return components.url ?? bridgeBaseURL.appendingPathComponent(slidePath).appendingPathComponent(fileName)
+    return components.url
+      ?? bridgeBaseURL.appendingPathComponent(slidePath).appendingPathComponent(fileName)
   }
 
   private func encodedQueryValue(_ value: String) -> String {

@@ -119,11 +119,13 @@ public actor ControllerBridgeService {
       )
     }
 
-    guard let updatedManifest = rebuildManifest(
-      from: cachedManifest,
-      with: slide,
-      now: now
-    ) else {
+    guard
+      let updatedManifest = rebuildManifest(
+        from: cachedManifest,
+        with: slide,
+        now: now
+      )
+    else {
       return await navigationFailure(
         reason: "controller_manifest_rebuild_failed",
         requestID: requestID,
